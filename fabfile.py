@@ -1,22 +1,34 @@
 # This fabric script tests localwiki on all supported versions of Ubuntu
 from fabric.api import *
 from vm import *
-import fexpect
+from ilogue import fexpect
 
 
-images = { 'ubuntu10.04': 'ami-8cb33ebc',
-           'ubuntu10.10': 'ami-04f97434',
-           'ubuntu11.04': 'ami-18f97428',
-           'ubuntu11.10': 'ami-20f97410',
-           'ubuntu12.04': 'ami-3e800c0e'
-          }
+def get_ami(image_name):
+    if settings.EC2_REGION == 'us-west-1':
+        images = {
+           'ubuntu10.04': 'ami-a1c59de4',
+           'ubuntu10.10': 'ami-2b154e6e',
+           'ubuntu11.04': 'ami-33fda576',
+           'ubuntu11.10': 'ami-0fc59d4a',
+           'ubuntu12.04': 'ami-e7712aa2'
+        }
+    elif settings.EC2_REGION == 'us-west-2':
+        images = {
+           'ubuntu10.04': 'ami-f6ec60c6',
+           'ubuntu10.10': 'ami-7efd714e',
+           'ubuntu11.04': 'ami-beef638e',
+           'ubuntu11.10': 'ami-a4ec6094',
+           'ubuntu12.04': 'ami-38800c08'
+        }
+    return images[image_name]
 
 prompts = []
 prompts += fexpect.expect('3. Paste the API key below:', 'e886fd33ac5743868c31dfebecdb129b')
 prompts += fexpect.expect('Would you like to create one now?', 'no')
 
 def test_install(image_name):
-    with temporary_ec2_instance(ami_id=images[image_name]):
+    with temporary_ec2_instance(ami_id=get_ami(image_name)):
         sudo('apt-get -y install python-software-properties')
         sudo('yes | apt-add-repository ppa:localwikidev/testing')
         sudo('apt-get update')
@@ -37,7 +49,7 @@ def import_mediawiki(url=None):
         import_prompts += fexpect.expect('Enter the address of a MediaWiki site (ex: http://arborwiki.org/):',
                                          url)
     import_prompts += fexpect.expect('Continue import? (yes/no)', 'yes')
-    with ec2_instance(ami_id=images['ubuntu10.04']):
+    with ec2_instance(ami_id=get_ami('ubuntu10.04')):
         sudo('apt-get -y install python-software-properties')
         sudo('yes | apt-add-repository ppa:localwiki')
         sudo('apt-get update')
