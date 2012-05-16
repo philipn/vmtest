@@ -37,7 +37,7 @@ class ec2_instance:
                              aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
         res = conn.run_instances(self.ami_id,
                    key_name=EC2_KEY_NAME,
-                   instance_type='t1.micro',
+                   instance_type='m1.small',
                    security_groups=[EC2_SECURITY_GROUP])
         self.instance = res.instances[0]
         print "Spinning up instance. Waiting for it to start. "
