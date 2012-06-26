@@ -4,7 +4,7 @@ from vm import *
 from ilogue import fexpect
 
 
-def get_ami(image_name):
+def get_images():
     if settings.EC2_REGION == 'us-west-1':
         images = {
            'ubuntu10.04': 'ami-a1c59de4',
@@ -21,11 +21,22 @@ def get_ami(image_name):
            'ubuntu11.10': 'ami-a4ec6094',
            'ubuntu12.04': 'ami-38800c08'
         }
-    return images[image_name]
+    return images
+
+
+def get_ami(image_name):
+    return get_images()[image_name]
+
 
 prompts = []
 prompts += fexpect.expect('3. Paste the API key below:', 'e886fd33ac5743868c31dfebecdb129b')
 prompts += fexpect.expect('Would you like to create one now?', 'no')
+
+
+def test_install_all():
+    for image_name in get_images():
+        test_install(image_name)
+
 
 def test_install(image_name):
     with temporary_ec2_instance(ami_id=get_ami(image_name)):
